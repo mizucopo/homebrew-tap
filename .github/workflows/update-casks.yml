@@ -1,0 +1,57 @@
+name: Update verified release casks
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Commit verified updates to main (false only verifies)
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+# Pending runs may be coalesced. Every run checks ALL apps, never only its sender.
+concurrency:
+  group: update-release-casks-${{ inputs.apply && 'publish' || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'mizucopo/homebrew-tap' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Check activation
+        env:
+          ENABLED: ${{ vars.HOMEBREW_AUTO_UPDATE_ENABLED }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          if [[ "$APPLY" == true && "$ENABLED" != true ]]; then
+            echo '::error::Automatic publishing is not enabled. Complete setup and verify a dry run first.'
+            exit 1
+          fi
+
+      - name: Checkout trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Test updater
+        run: python3 -m unittest discover -s automation/tests -v
+
+      - name: Verify without publishing
+        if: ${{ !inputs.apply }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 automation/update_casks.py --check
+
+      - name: Verify and publish narrow cask changes
+        if: inputs.apply
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash automation/publish.sh
