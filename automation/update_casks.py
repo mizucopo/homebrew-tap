@@ -12,6 +12,7 @@ import stat
 import struct
 import tempfile
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -167,12 +168,16 @@ def validate_zip(path, app, version):
                 "ZIP exceeds the entry or uncompressed-size limit")
         names = [entry.filename for entry in entries]
         require(len(names) == len(set(names)), "Duplicate ZIP entries")
+        mac_names = [unicodedata.normalize("NFD", name.rstrip("/")).casefold() for name in names]
+        require(len(mac_names) == len(set(mac_names)), "ZIP paths collide on a macOS filesystem")
         for entry in entries:
             name = entry.filename
             parts = PurePosixPath(name).parts
             require(name and not name.startswith("/") and "\\" not in name and "\x00" not in name
                     and ".." not in parts and "." not in name.split("/")
                     and parts[0] in (app["app"], "__MACOSX"), "Unexpected or unsafe ZIP path")
+            require(entry.orig_filename == name
+                    and name.rstrip("/") == PurePosixPath(name).as_posix(), "Non-canonical ZIP path")
             mode = entry.external_attr >> 16
             require(stat.S_IFMT(mode) in (0, stat.S_IFREG, stat.S_IFDIR),
                     "ZIP links and special files are not accepted")
