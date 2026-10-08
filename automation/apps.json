@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "token": "mizu-pairrank",
+      "repository": "mizucopo/mizu-pairrank",
+      "tag_prefix": "",
+      "asset": "mizu-pairrank-{version}-macos-arm64.zip",
+      "app": "mizu-pairrank.app",
+      "bundle_id": "dev.mizu.pairrank"
+    }
+  ]
+}
