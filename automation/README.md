@@ -62,7 +62,27 @@ App のトークンは通知ジョブで発行し、権限は Tap の Actions wr
 3. 新しいアプリの Release 完了後にも同じ Tap ワークフローの通知ジョブを追加します。新しい通知元への秘密鍵登録は、そのリポジトリが App の権限を行使できるようにする変更なので改めて承認・レビューします。
 4. テスト・dry run・対応 Mac でのインストールを確認してから、その通知元を有効にします。
 
-Intel/universal、DMG、CLI formula、prerelease、build metadata 付き SemVer は今の自動処理の対象外です。形式を足すときは検証とテストを追加し、ARM64 用のチェックを省略しないでください。
+Intel/universal、DMG、CLI Formula、prerelease、build metadata 付き SemVer は今の自動処理の対象外です。形式を足すときは検証とテストを追加し、ARM64 用のチェックを省略しないでください。
+
+## CLI Formula の更新
+
+`game-screen-pick` は `Formula/game-screen-pick.rb` で管理します。`apps.json` には登録せず、上記の Cask updater・通知・資格情報・公開範囲を変更しません。
+次回安定版の公開後、保守者が以下の手動レビュー付き更新を行います。`brew livecheck` は検出だけを行い、更新や公開はしません。
+
+```sh
+brew livecheck --formula mizucopo/tap/game-screen-pick
+```
+
+1. [配布元の latest Release](https://github.com/mizucopo/game-screen-pick/releases/latest) が公開済み・非 draft・非 prerelease の数値3要素の安定版で、登録版より新しいことを確認します。同一版の差し替え・後退は更新せず原因を確認します。
+2. 新しい空ディレクトリに、同じ版の `game-screen-pick-VERSION-macos-arm64.tar.gz`、`game-screen-pick-VERSION-linux-x86_64.tar.gz` と各 `.sha256` を固定 URL から取得します。
+3. 各 archive の実際の SHA-256 を checksum と GitHub API の asset `digest` の両方と照合します。macOS では `shasum -a 256 -c <archive>.sha256`、Linux では `sha256sum -c <archive>.sha256` を使えます。一致しなければ展開・更新しません。
+4. archive 内のパス・リンクを確認して空ディレクトリへ展開します。`BUILD-INFO.json` の version/target/commit、binary の SHA-256、`DEPENDENCIES.txt` の最低 OS・dynamic library、実際の実行形式・CPU と `--version` が一致することを確認します。設定例・文書・全 license 資料も確認します。形式変更時は既存契約のまま更新しません。
+5. 専用ブランチで Formula の **両 OS の** 固定 `url` と `sha256` を更新します。Homebrew は URL から version を読み取ります。`bin` や設定例の配置、CPU/OS 制約、`ffmpeg` 依存も再確認します。
+6. `brew style Formula/game-screen-pick.rb`、`brew audit --strict --online --formula mizucopo/tap/game-screen-pick`、Tap 経由の install・`brew test`・旧登録版からの `brew upgrade` を対応環境で確認します。テスト対象ブランチを使い、main の未更新 Formula と取り違えないでください。
+7. Release/asset 情報を再取得し、検証中に latest・asset ID・digest が変わっていないことを確認して、対応 OS ごとの検証環境・結果・未検証点を添えた PR を作成します。Formula の install・audit・FFmpeg による実画像抽出・upgrade は手順6で実施し、既存 Cask automation の CI も通してからレビュー・取り込みます。現行 CI は Cask automation の検証で、Formula の実行試験は行いません。
+
+この Tap 自体は採番や GitHub Release を行いません。game-screen-pick のアーカイブ生成・checksum 公開・Release ワークフローは `repo-template` 側の既存配布契約を使い、この Tap に複製しません。
+本手順には新たな通知元・secret・権限・有効化変数の追加は不要です。将来自動化する場合は、CLI の検証契約を設計し、template 管理箇所の変更は上流で扱います。
 
 ## ローカル検証
 
