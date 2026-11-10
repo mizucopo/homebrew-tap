@@ -1,6 +1,6 @@
 cask "mizu-pairrank" do
-  version "1.8.2"
-  sha256 "8d137ae199a91d6bad0d7c96a1420832491ba4e48b6bd26117823e7461fc9879"
+  version "1.8.3"
+  sha256 "aba9cb779a58fb2ddb285f3e8c5304e3c1018806da3769939b694aa6c2d2b803"
 
   url "https://github.com/mizucopo/mizu-pairrank/releases/download/#{version}/mizu-pairrank-#{version}-macos-arm64.zip"
   name "mizu-pairrank"
