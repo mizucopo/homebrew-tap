@@ -13,7 +13,7 @@ CLI は `Formula/<名前>.rb`、デスクトップアプリは `Casks/<名前>.r
 | Linux / x86_64 GNU | Ubuntu 22.04相当以降（glibc 2.35以降、libgcc、標準 dynamic loader）かつ Homebrew の対応環境。配布物の完全性・ELF/CPU は確認済み。Linux 上の Tap 経由の導入・更新は未検証 |
 | Intel Mac / Linux ARM64 / Windows | この Formula の対象外。Windows は配布元の Releases を参照 |
 
-- パッケージ名（pc-setup 向け）: `mizucopo/tap/game-screen-pick`（Formula）
+- パッケージ名: `mizucopo/tap/game-screen-pick`（Formula）
 - 登録版: [Formula の固定 URL](Formula/game-screen-pick.rb)（`brew info mizucopo/tap/game-screen-pick` でも確認可能）。OS 別の固定 URL と SHA-256 でダウンロードを検証します
 - 実行時の `ffmpeg` と `ffprobe` は Homebrew の `ffmpeg` 依存として導入します。日本語 font は binary に含まれます
 - AI による選定には、画像・動画能力を確認した推論 endpoint、model、認証・設定が別途必要です。推論なしの `extract` も利用できます
